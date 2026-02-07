@@ -79,9 +79,16 @@ COPY skills ./skills
 # Copy config
 COPY config ./config
 
-# Create data directory for bot memory/state
-RUN mkdir -p /data/memory /data/sessions \
-  && chown -R node:node /app /data
+# Copy workspace files (agent identity + boot sequence)
+COPY SOUL.md BOOT.md ./
+
+# Install config to OpenClaw's expected location
+# OPENCLAW_CONFIG_PATH env var points to our config
+ENV OPENCLAW_CONFIG_PATH=/app/config/anrakpilot.default.json
+
+# Create data directories for bot memory/state and OpenClaw state
+RUN mkdir -p /data/memory /data/sessions /home/node/.openclaw/state \
+  && chown -R node:node /app /data /home/node/.openclaw
 
 # Run as non-root
 USER node

@@ -19,8 +19,26 @@
         "openrouter/anthropic/claude-opus-4-6": {
           "alias": "opus"
         }
+      },
+      "workspace": "/app",
+      "userTimezone": "Asia/Kolkata",
+      "memorySearch": {
+        "store": {
+          "path": "/data/memory/{agentId}.sqlite"
+        }
       }
-    }
+    },
+    "list": [
+      {
+        "id": "anrakpilot",
+        "name": "AnrakPilot",
+        "default": true,
+        "identity": {
+          "name": "AnrakPilot",
+          "emoji": "⚖️"
+        }
+      }
+    ]
   },
   "models": {
     "mode": "replace",
@@ -79,7 +97,12 @@
   "gateway": {
     "controlUi": {
       "enabled": false
-    }
+    },
+    "boot": true
+  },
+  "browser": {
+    "enabled": true,
+    "headless": true
   },
   "commands": {
     "restart": false
