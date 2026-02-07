@@ -1,0 +1,26 @@
+# AnrakPilot: Local development and testing
+# Usage: docker compose -f docker-compose.anrakpilot.yml up --build
+version: "3.9"
+
+services:
+  anrakpilot:
+    build:
+      context: .
+      dockerfile: Dockerfile.anrakpilot
+    container_name: anrakpilot-dev
+    ports:
+      - "18789:18789"
+    environment:
+      - BOT_API_URL=https://anrak.legal
+      - BOT_API_TOKEN=${BOT_API_TOKEN}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - BOT_USER_ID=${BOT_USER_ID}
+      - OPENCLAW_GATEWAY_PORT=18789
+    volumes:
+      - anrakpilot-data:/data
+    restart: unless-stopped
+    mem_limit: 2g
+    cpus: 1.0
+
+volumes:
+  anrakpilot-data:

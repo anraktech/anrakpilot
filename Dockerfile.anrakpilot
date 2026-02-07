@@ -1,0 +1,102 @@
+# AnrakPilot: Autonomous AI Bot for Lawyers
+# Multi-stage build for minimal image size
+# Target: Azure Container Instances (1 vCPU, 2GB RAM per lawyer)
+
+# ── Stage 1: Build ──────────────────────────────────────────
+FROM node:22-bookworm-slim AS builder
+
+RUN corepack enable
+
+WORKDIR /app
+
+# Copy dependency files first for layer caching
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY patches ./patches
+
+# Copy workspace package.json files (required by pnpm)
+COPY packages/clawdbot/package.json ./packages/clawdbot/package.json
+COPY packages/moltbot/package.json ./packages/moltbot/package.json
+COPY extensions/diagnostics-otel/package.json ./extensions/diagnostics-otel/package.json
+COPY extensions/llm-task/package.json ./extensions/llm-task/package.json
+COPY extensions/memory-core/package.json ./extensions/memory-core/package.json
+COPY extensions/memory-lancedb/package.json ./extensions/memory-lancedb/package.json
+
+# Install dependencies (production + build tools)
+RUN pnpm install --frozen-lockfile
+
+# Copy source and build
+COPY src ./src
+COPY config ./config
+COPY skills ./skills
+COPY tsdown.config.ts tsconfig.json ./
+
+# Build only the anrakpilot entry point
+RUN npx tsdown --entry src/anrakpilot.ts --platform node
+
+# ── Stage 2: Runtime ────────────────────────────────────────
+FROM node:22-bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV NODE_ENV=production
+
+# Install Chromium for Playwright browser automation
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    chromium \
+    fonts-liberation \
+    fonts-noto-cjk \
+    curl \
+    ca-certificates \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+# Playwright should use system Chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
+
+WORKDIR /app
+
+# Copy dependency files and install production deps only
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY patches ./patches
+COPY packages/clawdbot/package.json ./packages/clawdbot/package.json
+COPY packages/moltbot/package.json ./packages/moltbot/package.json
+COPY extensions/diagnostics-otel/package.json ./extensions/diagnostics-otel/package.json
+COPY extensions/llm-task/package.json ./extensions/llm-task/package.json
+COPY extensions/memory-core/package.json ./extensions/memory-core/package.json
+COPY extensions/memory-lancedb/package.json ./extensions/memory-lancedb/package.json
+
+RUN corepack enable \
+  && pnpm install --frozen-lockfile --prod \
+  && pnpm store prune
+
+# Copy build output
+COPY --from=builder /app/dist ./dist
+
+# Copy skills (SKILL.md files loaded at runtime)
+COPY skills ./skills
+
+# Copy config
+COPY config ./config
+
+# Create data directory for bot memory/state
+RUN mkdir -p /data/memory /data/sessions \
+  && chown -R node:node /app /data
+
+# Run as non-root
+USER node
+
+# Health check endpoint on gateway port
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -sf http://localhost:18789/health || exit 1
+
+# Gateway port
+EXPOSE 18789
+
+# Environment variables (set at container creation time):
+# BOT_API_URL       - AnrakLegal control plane URL (https://anrak.legal)
+# BOT_API_TOKEN     - Bot JWT token for authentication
+# OPENROUTER_API_KEY - OpenRouter API key for LLM calls
+# BOT_USER_ID       - Lawyer's user ID
+
+CMD ["node", "dist/anrakpilot.js"]
