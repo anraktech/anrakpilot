@@ -1,0 +1,87 @@
+{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openrouter/moonshotai/kimi-k2-0905",
+        "fallbacks": [
+          "openrouter/anthropic/claude-sonnet-4-5",
+          "openrouter/anthropic/claude-opus-4-6"
+        ]
+      },
+      "models": {
+        "openrouter/moonshotai/kimi-k2-0905": {
+          "alias": "kimi",
+          "streaming": true
+        },
+        "openrouter/anthropic/claude-sonnet-4-5": {
+          "alias": "sonnet"
+        },
+        "openrouter/anthropic/claude-opus-4-6": {
+          "alias": "opus"
+        }
+      }
+    }
+  },
+  "models": {
+    "mode": "replace",
+    "providers": {
+      "openrouter": {
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "api": "openai-completions",
+        "authHeader": true,
+        "models": [
+          {
+            "id": "moonshotai/kimi-k2-0905",
+            "name": "KIMI K2 (Default)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0.4,
+              "output": 1.75,
+              "cacheRead": 0.1,
+              "cacheWrite": 0.4
+            },
+            "contextWindow": 262144,
+            "maxTokens": 16384
+          },
+          {
+            "id": "anthropic/claude-sonnet-4-5",
+            "name": "Claude Sonnet 4.5 (Critical)",
+            "reasoning": true,
+            "input": ["text", "image"],
+            "cost": {
+              "input": 3,
+              "output": 15,
+              "cacheRead": 0.3,
+              "cacheWrite": 3.75
+            },
+            "contextWindow": 200000,
+            "maxTokens": 16384
+          },
+          {
+            "id": "anthropic/claude-opus-4-6",
+            "name": "Claude Opus 4.6 (Ultra-Critical)",
+            "reasoning": true,
+            "input": ["text", "image"],
+            "cost": {
+              "input": 15,
+              "output": 75,
+              "cacheRead": 1.5,
+              "cacheWrite": 18.75
+            },
+            "contextWindow": 200000,
+            "maxTokens": 16384
+          }
+        ]
+      }
+    }
+  },
+  "gateway": {
+    "controlUi": {
+      "enabled": false
+    }
+  },
+  "commands": {
+    "restart": false
+  }
+}

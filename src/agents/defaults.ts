@@ -1,6 +1,6 @@
-// Defaults for agent metadata when upstream does not supply them.
-// Model id uses pi-ai's built-in Anthropic catalog.
-export const DEFAULT_PROVIDER = "anthropic";
-export const DEFAULT_MODEL = "claude-opus-4-6";
-// Conservative fallback used when model metadata is unavailable.
-export const DEFAULT_CONTEXT_TOKENS = 200_000;
+// AnrakPilot: Default model is KIMI K2 via OpenRouter for cost efficiency.
+// Claude Sonnet/Opus used for critical legal tasks (drafting, court prep).
+export const DEFAULT_PROVIDER = "openrouter";
+export const DEFAULT_MODEL = "moonshotai/kimi-k2-0905";
+// KIMI K2 supports 256K context window.
+export const DEFAULT_CONTEXT_TOKENS = 256_000;
