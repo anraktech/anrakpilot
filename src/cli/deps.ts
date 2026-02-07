@@ -1,32 +1,33 @@
+// AnrakPilot: Messaging channels removed. All send functions are no-ops.
 import type { OutboundSendDeps } from "../infra/outbound/deliver.js";
-import { logWebSelfId, sendMessageWhatsApp } from "../channels/web/index.js";
-import { sendMessageDiscord } from "../discord/send.js";
-import { sendMessageIMessage } from "../imessage/send.js";
-import { sendMessageSignal } from "../signal/send.js";
-import { sendMessageSlack } from "../slack/send.js";
-import { sendMessageTelegram } from "../telegram/send.js";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SendFn = (...args: any[]) => Promise<void>;
+
+const noopSend: SendFn = async () => {
+  // AnrakPilot does not send messages via channels.
+};
 
 export type CliDeps = {
-  sendMessageWhatsApp: typeof sendMessageWhatsApp;
-  sendMessageTelegram: typeof sendMessageTelegram;
-  sendMessageDiscord: typeof sendMessageDiscord;
-  sendMessageSlack: typeof sendMessageSlack;
-  sendMessageSignal: typeof sendMessageSignal;
-  sendMessageIMessage: typeof sendMessageIMessage;
+  sendMessageWhatsApp: SendFn;
+  sendMessageTelegram: SendFn;
+  sendMessageDiscord: SendFn;
+  sendMessageSlack: SendFn;
+  sendMessageSignal: SendFn;
+  sendMessageIMessage: SendFn;
 };
 
 export function createDefaultDeps(): CliDeps {
   return {
-    sendMessageWhatsApp,
-    sendMessageTelegram,
-    sendMessageDiscord,
-    sendMessageSlack,
-    sendMessageSignal,
-    sendMessageIMessage,
+    sendMessageWhatsApp: noopSend,
+    sendMessageTelegram: noopSend,
+    sendMessageDiscord: noopSend,
+    sendMessageSlack: noopSend,
+    sendMessageSignal: noopSend,
+    sendMessageIMessage: noopSend,
   };
 }
 
-// Provider docking: extend this mapping when adding new outbound send deps.
 export function createOutboundSendDeps(deps: CliDeps): OutboundSendDeps {
   return {
     sendWhatsApp: deps.sendMessageWhatsApp,
@@ -38,4 +39,6 @@ export function createOutboundSendDeps(deps: CliDeps): OutboundSendDeps {
   };
 }
 
-export { logWebSelfId };
+export function logWebSelfId(_selfId: string): void {
+  // no-op
+}

@@ -1,10 +1,8 @@
-import { isRich, theme } from "./theme.js";
+// Stub: terminal removed from AnrakPilot fork (headless server).
+export function formatPrompt(_text: string): string {
+  return "";
+}
 
-export const stylePromptMessage = (message: string): string =>
-  isRich() ? theme.accent(message) : message;
-
-export const stylePromptTitle = (title?: string): string | undefined =>
-  title && isRich() ? theme.heading(title) : title;
-
-export const stylePromptHint = (hint?: string): string | undefined =>
-  hint && isRich() ? theme.muted(hint) : hint;
+export function formatPromptChoice(label: string, _selected?: boolean): string {
+  return label;
+}

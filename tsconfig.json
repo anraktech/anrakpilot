@@ -19,6 +19,15 @@
     "target": "es2023",
     "useDefineForClassFields": false
   },
-  "include": ["src/**/*", "ui/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/*.test.ts",
+    "src/**/*.e2e.test.ts",
+    "src/cli/daemon-cli/**",
+    "src/cli/tui-cli.ts",
+    "src/cli/pairing-cli.ts",
+    "src/cli/terminal*.ts"
+  ]
 }

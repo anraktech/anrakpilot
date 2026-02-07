@@ -6,13 +6,13 @@ const env = {
 
 export default defineConfig([
   {
-    entry: "src/index.ts",
+    entry: "src/anrakpilot.ts",
     env,
     fixedExtension: false,
     platform: "node",
   },
   {
-    entry: "src/entry.ts",
+    entry: "src/index.ts",
     env,
     fixedExtension: false,
     platform: "node",
