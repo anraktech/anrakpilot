@@ -4,6 +4,8 @@ import type { AnyAgentTool } from "./tools/common.js";
 import { resolvePluginTools } from "../plugins/tools.js";
 import { resolveSessionAgentId } from "./agent-scope.js";
 import { createAgentsListTool } from "./tools/agents-list-tool.js";
+import { createAnrakActionsTool } from "./tools/anrak-actions-tool.js";
+import { createAnrakCasesTool } from "./tools/anrak-cases-tool.js";
 import { createBrowserTool } from "./tools/browser-tool.js";
 import { createCanvasTool } from "./tools/canvas-tool.js";
 import { createCronTool } from "./tools/cron-tool.js";
@@ -147,6 +149,12 @@ export function createOpenClawTools(options?: {
     ...(webFetchTool ? [webFetchTool] : []),
     ...(imageTool ? [imageTool] : []),
   ];
+
+  // AnrakLegal tools (only available when BOT_API_URL + BOT_API_TOKEN are set)
+  const anrakCasesTool = createAnrakCasesTool();
+  const anrakActionsTool = createAnrakActionsTool();
+  if (anrakCasesTool) tools.push(anrakCasesTool);
+  if (anrakActionsTool) tools.push(anrakActionsTool);
 
   const pluginTools = resolvePluginTools({
     context: {
