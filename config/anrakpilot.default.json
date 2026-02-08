@@ -94,15 +94,29 @@
       }
     }
   },
+  "plugins": {
+    "slots": {}
+  },
   "gateway": {
     "controlUi": {
       "enabled": false
     },
-    "boot": true
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
+    }
   },
   "browser": {
     "enabled": true,
     "headless": true
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true
+    }
   },
   "commands": {
     "restart": false
