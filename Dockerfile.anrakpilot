@@ -73,11 +73,17 @@ RUN corepack enable \
 # Copy build output
 COPY --from=builder /app/dist ./dist
 
+# Copy extensions (plugin manifests + source required at runtime)
+COPY extensions ./extensions
+
 # Copy skills (SKILL.md files loaded at runtime)
 COPY skills ./skills
 
 # Copy config
 COPY config ./config
+
+# Copy workspace templates (required by OpenClaw agent bootstrap)
+COPY docs ./docs
 
 # Copy workspace files (agent identity + boot sequence)
 COPY SOUL.md BOOT.md ./
