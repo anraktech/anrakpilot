@@ -45,6 +45,10 @@ export function setTtsProvider(_prefsPath: string, _provider: TtsProvider): void
   // no-op
 }
 
+export function buildTtsSystemPromptHint(_config: unknown): string | undefined {
+  return undefined;
+}
+
 export async function textToSpeech(_opts: {
   text: string;
   cfg: unknown;
