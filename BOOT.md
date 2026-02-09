@@ -22,7 +22,7 @@ schedule: { kind: "cron", expr: "30 0 * * *", tz: "Asia/Kolkata" }
 sessionTarget: "isolated"
 payload: {
   kind: "agentTurn",
-  message: "Run the deadline-monitor skill. Use anrak_cases to scan ALL active cases for upcoming deadlines. Check nextHearing dates and checklist item due dates. Classify urgency (>7 days = normal, 3-7 = warning, 1-3 = urgent, <1 = critical, past = overdue). Log results via anrak_actions with action_type 'schedule' and risk_level 'low'.",
+  message: "Run the deadline-monitor skill. Use anrak_cases to scan ALL active cases for upcoming deadlines. Check nextHearing dates and checklist item due dates. Classify urgency (>7 days = normal, 3-7 = warning, 1-3 = urgent, <1 = critical, past = overdue). Save the full deadline report as a case document using save_document. If ANY deadline is within 3 days or overdue, use anrak_actions notify_lawyer with urgency 'urgent' to email the lawyer immediately. If deadlines found need follow-up research or drafting, use create_task to queue those. Log results via anrak_actions with action_type 'schedule' and risk_level 'low'.",
   timeoutSeconds: 120
 }
 ```
@@ -35,7 +35,7 @@ schedule: { kind: "cron", expr: "30 1 * * *", tz: "Asia/Kolkata" }
 sessionTarget: "isolated"
 payload: {
   kind: "agentTurn",
-  message: "Run the case-briefing skill. Use anrak_cases to generate a concise daily briefing covering: today's priorities (hearings, deadlines), this week's calendar, case status summary, recent bot activity, and items needing lawyer attention. Keep it under 500 words. Log via anrak_actions with action_type 'notify' and risk_level 'low'.",
+  message: "Run the case-briefing skill. Use anrak_cases to generate a concise daily briefing covering: today's priorities (hearings, deadlines), this week's calendar, case status summary, recent bot activity, and items needing lawyer attention. Keep it under 500 words. Save the briefing as a document in each relevant case using save_document. Then use anrak_actions notify_lawyer to email the full briefing to the lawyer with urgency 'normal'. If you spot anything requiring action, use create_task to queue follow-up work. Log via anrak_actions with action_type 'notify' and risk_level 'low'.",
   timeoutSeconds: 120
 }
 ```
@@ -48,7 +48,7 @@ schedule: { kind: "cron", expr: "0 2 * * 1-5", tz: "Asia/Kolkata" }
 sessionTarget: "isolated"
 payload: {
   kind: "agentTurn",
-  message: "Run the web-research skill focused on cause lists. Use anrak_cases to get active cases, then use the browser tool to check relevant court cause lists on ecourts.gov.in for today's listings. Look for the lawyer's case numbers. Log findings via anrak_actions with action_type 'research' and risk_level 'medium'.",
+  message: "Run the web-research skill focused on cause lists. Use anrak_cases to get active cases, then use the browser tool to check relevant court cause lists on ecourts.gov.in for today's listings. Look for the lawyer's case numbers. If any case is listed today, immediately use anrak_actions notify_lawyer with urgency 'urgent' to alert the lawyer. Save findings as a case document using save_document. Log findings via anrak_actions with action_type 'research' and risk_level 'medium'.",
   timeoutSeconds: 180
 }
 ```
