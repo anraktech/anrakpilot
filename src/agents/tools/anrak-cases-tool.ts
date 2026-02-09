@@ -17,12 +17,16 @@ const ACTIONS = [
   "search_documents",
   "get_checklist",
   "update_checklist_item",
+  "save_document",
+  "update_case",
 ] as const;
 
 const AnrakCasesSchema = Type.Object({
   action: stringEnum(ACTIONS, {
     description:
-      "Action to perform: list_cases (all cases), get_case (case details), get_documents (case docs), search_documents (semantic search), get_checklist (checklist items), update_checklist_item (mark item done)",
+      "Action to perform: list_cases (all cases), get_case (case details), get_documents (case docs), " +
+      "search_documents (semantic search), get_checklist (checklist items), update_checklist_item (mark item done), " +
+      "save_document (save content as case document), update_case (update case description/status/notes)",
   }),
   case_id: Type.Optional(
     Type.String({ description: "Case ID (required for all actions except list_cases)" }),
@@ -40,6 +44,16 @@ const AnrakCasesSchema = Type.Object({
     Type.Boolean({ description: "Mark checklist item as completed/incomplete" }),
   ),
   text: Type.Optional(Type.String({ description: "Updated text for checklist item" })),
+  title: Type.Optional(Type.String({ description: "Document title (for save_document)" })),
+  content: Type.Optional(Type.String({ description: "Document content (for save_document)" })),
+  file_type: Type.Optional(
+    Type.String({ description: "File type, e.g. 'md', 'txt' (default: md)" }),
+  ),
+  notes: Type.Optional(Type.String({ description: "Case notes to update (for update_case)" })),
+  status: Type.Optional(
+    Type.String({ description: "Case status: ACTIVE, ON_HOLD, CLOSED (for update_case)" }),
+  ),
+  description: Type.Optional(Type.String({ description: "Case description (for update_case)" })),
 });
 
 let _client: AnrakLegalClient | null = null;
@@ -68,10 +82,11 @@ export function createAnrakCasesTool(): AnyAgentTool | null {
     label: "AnrakLegal Cases",
     name: "anrak_cases",
     description:
-      "Access the lawyer's cases, documents, and checklists from the AnrakLegal platform. " +
+      "Access and manage the lawyer's cases, documents, and checklists from the AnrakLegal platform. " +
       "Use list_cases to see all cases, get_case for details, get_documents for case files, " +
       "search_documents for semantic search across case content, get_checklist for task items, " +
-      "and update_checklist_item to mark items complete.",
+      "update_checklist_item to mark items complete, save_document to save research/drafts as case docs, " +
+      "and update_case to update case metadata (description, status, notes).",
     parameters: AnrakCasesSchema,
     execute: async (_toolCallId, args) => {
       const params = args as Record<string, unknown>;
@@ -124,6 +139,28 @@ export function createAnrakCasesTool(): AnyAgentTool | null {
           if (text !== undefined) updates.text = text;
           await client.updateChecklistItem(caseId, itemId, updates);
           return jsonResult({ ok: true, itemId, updates });
+        }
+
+        case "save_document": {
+          const caseId = readStringParam(params, "case_id", { required: true });
+          const title = readStringParam(params, "title", { required: true });
+          const content = readStringParam(params, "content", { required: true });
+          const fileType = readStringParam(params, "file_type");
+          const result = await client.saveDocument(caseId, title, content, fileType ?? undefined);
+          return jsonResult({ ok: true, documentId: result.documentId });
+        }
+
+        case "update_case": {
+          const caseId = readStringParam(params, "case_id", { required: true });
+          const description = readStringParam(params, "description");
+          const status = readStringParam(params, "status");
+          const notes = readStringParam(params, "notes");
+          const updates: { description?: string; status?: string; notes?: string } = {};
+          if (description) updates.description = description;
+          if (status) updates.status = status;
+          if (notes) updates.notes = notes;
+          await client.updateCase(caseId, updates);
+          return jsonResult({ ok: true, caseId, updates });
         }
 
         default:

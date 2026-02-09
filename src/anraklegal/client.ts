@@ -156,6 +156,91 @@ export class AnrakLegalClient {
     });
   }
 
+  // --- Cases - Write ---
+
+  async saveDocument(
+    caseId: string,
+    title: string,
+    content: string,
+    fileType?: string,
+  ): Promise<{ documentId: string; hash: string }> {
+    return this.request("POST", `/api/bot/gateway/cases/${caseId}/documents`, {
+      title,
+      content,
+      ...(fileType ? { fileType } : {}),
+    });
+  }
+
+  async updateCase(
+    caseId: string,
+    updates: { description?: string; status?: string; notes?: string },
+  ): Promise<void> {
+    await this.request("PUT", `/api/bot/gateway/cases/${caseId}`, updates);
+  }
+
+  // --- Tasks - Self ---
+
+  async createTask(
+    description: string,
+    priority?: "normal" | "high",
+    caseId?: string,
+  ): Promise<{ taskId: string }> {
+    return this.request("POST", "/api/bot/gateway/tasks", {
+      description,
+      ...(priority ? { priority } : {}),
+      ...(caseId ? { caseId } : {}),
+    });
+  }
+
+  async listTasks(
+    status?: string,
+    limit?: number,
+  ): Promise<{ tasks: Array<{ id: string; description: string; status: string }> }> {
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (limit) params.set("limit", String(limit));
+    const qs = params.toString();
+    return this.request("GET", `/api/bot/gateway/tasks${qs ? `?${qs}` : ""}`);
+  }
+
+  // --- Schedules ---
+
+  async createSchedule(schedule: {
+    name: string;
+    scheduleType: string;
+    scheduleValue: string;
+    taskType: string;
+    description?: string;
+    taskConfig?: Record<string, unknown>;
+    enabled?: boolean;
+  }): Promise<{ id: string }> {
+    return this.request("POST", "/api/bot/gateway/schedules", schedule);
+  }
+
+  async updateSchedule(scheduleId: string, updates: Record<string, unknown>): Promise<void> {
+    await this.request("PUT", `/api/bot/gateway/schedules/${scheduleId}`, updates);
+  }
+
+  async deleteSchedule(scheduleId: string): Promise<void> {
+    await this.request("DELETE", `/api/bot/gateway/schedules/${scheduleId}`);
+  }
+
+  // --- Notify ---
+
+  async notifyLawyer(
+    subject: string,
+    message: string,
+    urgency?: "normal" | "urgent",
+    caseId?: string,
+  ): Promise<void> {
+    await this.request("POST", "/api/bot/gateway/notify", {
+      subject,
+      message,
+      ...(urgency ? { urgency } : {}),
+      ...(caseId ? { caseId } : {}),
+    });
+  }
+
   // --- Actions & Audit ---
 
   async logAction(action: ActionInput): Promise<{ id: string }> {
