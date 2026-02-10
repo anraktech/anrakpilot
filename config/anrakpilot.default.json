@@ -2,13 +2,23 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "openrouter/moonshotai/kimi-k2-0905",
+        "primary": "nvidia/moonshotai/kimi-k2.5",
         "fallbacks": [
+          "openrouter/openrouter/auto",
+          "openrouter/moonshotai/kimi-k2-0905",
           "openrouter/anthropic/claude-sonnet-4-5",
           "openrouter/anthropic/claude-opus-4-6"
         ]
       },
       "models": {
+        "nvidia/moonshotai/kimi-k2.5": {
+          "alias": "nim",
+          "streaming": true
+        },
+        "openrouter/openrouter/auto": {
+          "alias": "auto",
+          "streaming": true
+        },
         "openrouter/moonshotai/kimi-k2-0905": {
           "alias": "kimi",
           "streaming": true
@@ -43,14 +53,49 @@
   "models": {
     "mode": "replace",
     "providers": {
+      "nvidia": {
+        "baseUrl": "https://integrate.api.nvidia.com/v1",
+        "api": "openai-completions",
+        "authHeader": true,
+        "models": [
+          {
+            "id": "moonshotai/kimi-k2.5",
+            "name": "Kimi K2.5 via Nvidia NIM (Free)",
+            "reasoning": true,
+            "input": ["text"],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 262144,
+            "maxTokens": 16384
+          }
+        ]
+      },
       "openrouter": {
         "baseUrl": "https://openrouter.ai/api/v1",
         "api": "openai-completions",
         "authHeader": true,
         "models": [
           {
+            "id": "openrouter/auto",
+            "name": "Auto (Cost-Optimized)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0.5,
+              "output": 2.0,
+              "cacheRead": 0.1,
+              "cacheWrite": 0.5
+            },
+            "contextWindow": 200000,
+            "maxTokens": 16384
+          },
+          {
             "id": "moonshotai/kimi-k2-0905",
-            "name": "KIMI K2 (Default)",
+            "name": "KIMI K2 (Fallback)",
             "reasoning": false,
             "input": ["text"],
             "cost": {
@@ -111,7 +156,9 @@
   },
   "browser": {
     "enabled": true,
-    "headless": true
+    "headless": true,
+    "noSandbox": true,
+    "defaultProfile": "openclaw"
   },
   "hooks": {
     "internal": {
