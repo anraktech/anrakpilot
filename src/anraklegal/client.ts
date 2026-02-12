@@ -65,6 +65,7 @@ export type ActionInput = {
   status: "completed" | "pending_approval" | "failed";
   durationMs?: number;
   caseId?: string;
+  result?: string;
   metadata?: Record<string, unknown>;
 };
 

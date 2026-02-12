@@ -59,6 +59,13 @@ const AnrakActionsSchema = Type.Object({
   status: Type.Optional(stringEnum(ACTION_STATUSES, { description: "Action status" })),
   duration_ms: Type.Optional(Type.Number({ description: "Action duration in milliseconds" })),
   case_id: Type.Optional(Type.String({ description: "Associated case ID" })),
+  result: Type.Optional(
+    Type.String({
+      description:
+        "Full text output of the completed work (research findings, analysis, summary). " +
+        "ALWAYS include this when logging completed actions — it's what the lawyer sees in the dashboard.",
+    }),
+  ),
   metadata: Type.Optional(
     Type.Record(Type.String(), Type.Unknown(), { description: "Additional structured data" }),
   ),
@@ -168,9 +175,10 @@ export function createAnrakActionsTool(): AnyAgentTool | null {
             | "failed";
           const durationMs = readNumberParam(params, "duration_ms");
           const caseId = readStringParam(params, "case_id");
+          const resultText = readStringParam(params, "result");
           const metadata = params.metadata as Record<string, unknown> | undefined;
 
-          const result = await client.logAction({
+          const logResult = await client.logAction({
             actionType,
             riskLevel,
             description,
@@ -182,10 +190,11 @@ export function createAnrakActionsTool(): AnyAgentTool | null {
             status,
             ...(durationMs !== undefined ? { durationMs } : {}),
             ...(caseId ? { caseId } : {}),
+            ...(resultText ? { result: resultText } : {}),
             ...(metadata ? { metadata } : {}),
           });
 
-          return jsonResult({ ok: true, actionId: result.id });
+          return jsonResult({ ok: true, actionId: logResult.id });
         }
 
         case "request_approval": {

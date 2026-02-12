@@ -76,5 +76,6 @@ Use the `anrak_actions` tool to log the boot:
 - description: `"AnrakPilot boot complete. [N] active cases found. 4 cron jobs configured."`
 - tools_used: `["boot", "cron", "anrak_cases", "anrak_actions"]`
 - status: `"completed"`
+- result: A brief summary of the cases found and cron jobs set up
 
 After logging, your boot is complete. The cron jobs will handle autonomous operation from here.
