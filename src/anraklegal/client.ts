@@ -94,7 +94,26 @@ export type HeartbeatResponse = {
   ok: boolean;
   pendingApprovals: number;
   serverTime: string;
+  connectedToolkits?: string[];
 };
+
+// --- Composio types ---
+
+export type ComposioTool = {
+  name: string;
+  description: string;
+  toolkit: string;
+  schemas: Record<string, unknown>;
+};
+
+export type ComposioListToolsResponse = {
+  tools: ComposioTool[];
+  message?: string;
+};
+
+export type ComposioExecuteResponse =
+  | { result: unknown }
+  | { approvalRequired: true; approvalId: string; logId: string; reason: string };
 
 export class AnrakLegalClient {
   private baseUrl: string;
@@ -239,6 +258,26 @@ export class AnrakLegalClient {
       message,
       ...(urgency ? { urgency } : {}),
       ...(caseId ? { caseId } : {}),
+    });
+  }
+
+  // --- Composio (Connected Apps) ---
+
+  async listComposioTools(toolkits: string[]): Promise<ComposioListToolsResponse> {
+    return this.request("POST", "/api/bot/gateway/composio", {
+      action: "list_tools",
+      toolkits,
+    });
+  }
+
+  async executeComposioTool(
+    toolName: string,
+    args?: Record<string, unknown>,
+  ): Promise<ComposioExecuteResponse> {
+    return this.request("POST", "/api/bot/gateway/composio", {
+      action: "execute",
+      toolName,
+      arguments: args ?? {},
     });
   }
 

@@ -6,6 +6,7 @@ import { resolveSessionAgentId } from "./agent-scope.js";
 import { createAgentsListTool } from "./tools/agents-list-tool.js";
 import { createAnrakActionsTool } from "./tools/anrak-actions-tool.js";
 import { createAnrakCasesTool } from "./tools/anrak-cases-tool.js";
+import { createAnrakComposioTool } from "./tools/anrak-composio-tool.js";
 import { createBrowserTool } from "./tools/browser-tool.js";
 import { createCanvasTool } from "./tools/canvas-tool.js";
 import { createCronTool } from "./tools/cron-tool.js";
@@ -153,8 +154,10 @@ export function createOpenClawTools(options?: {
   // AnrakLegal tools (only available when BOT_API_URL + BOT_API_TOKEN are set)
   const anrakCasesTool = createAnrakCasesTool();
   const anrakActionsTool = createAnrakActionsTool();
+  const anrakComposioTool = createAnrakComposioTool();
   if (anrakCasesTool) tools.push(anrakCasesTool);
   if (anrakActionsTool) tools.push(anrakActionsTool);
+  if (anrakComposioTool) tools.push(anrakComposioTool);
 
   const pluginTools = resolvePluginTools({
     context: {

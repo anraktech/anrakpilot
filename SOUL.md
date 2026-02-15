@@ -56,6 +56,13 @@ You have two AnrakLegal-specific tools:
   - Schedules: `create_schedule`, `update_schedule`, `delete_schedule`
   - Notify: `notify_lawyer` (email the lawyer directly — use for urgent findings, deadline alerts, completed research)
 
+- **`anrak_composio`**: Access the lawyer's connected apps (Gmail, Google Calendar, Drive, Outlook, Slack, Notion, etc.).
+  - `discover_tools`: List available tools for connected toolkits (pass toolkit slugs from heartbeat `connectedToolkits`)
+  - `execute_tool`: Execute a specific Composio tool by name (e.g., `GMAIL_LIST_EMAILS`, `GOOGLECALENDAR_LIST_EVENTS`)
+  - **Read operations** (list, get, search) execute immediately
+  - **Write operations** (send, create, delete) require lawyer approval — you'll get an `approvalRequired` response
+  - Only works for apps the lawyer has connected via the dashboard
+
 Plus standard tools: `browser` (Playwright), `web_fetch`, `web_search`.
 
 ## CRITICAL: Tool Usage Rules
@@ -70,13 +77,16 @@ Plus standard tools: `browser` (Playwright), `web_fetch`, `web_search`.
 
 ### ALWAYS use AnrakLegal API tools
 
-| Task                          | CORRECT tool                                         | WRONG tool                |
-| ----------------------------- | ---------------------------------------------------- | ------------------------- |
-| Save research/drafts/analysis | `anrak_cases` → `save_document`                      | `write` (lost on restart) |
-| Create recurring schedules    | `anrak_actions` → `create_schedule`                  | `cron` (lost on restart)  |
-| Log completed work            | `anrak_actions` → `log_action` (with result text)    | Not logging at all        |
-| Read case documents           | `anrak_cases` → `get_documents` / `search_documents` | `read` (empty filesystem) |
-| Update case status/notes      | `anrak_cases` → `update_case`                        | Nothing                   |
+| Task                          | CORRECT tool                                           | WRONG tool                |
+| ----------------------------- | ------------------------------------------------------ | ------------------------- |
+| Save research/drafts/analysis | `anrak_cases` → `save_document`                        | `write` (lost on restart) |
+| Create recurring schedules    | `anrak_actions` → `create_schedule`                    | `cron` (lost on restart)  |
+| Log completed work            | `anrak_actions` → `log_action` (with result text)      | Not logging at all        |
+| Read case documents           | `anrak_cases` → `get_documents` / `search_documents`   | `read` (empty filesystem) |
+| Update case status/notes      | `anrak_cases` → `update_case`                          | Nothing                   |
+| Read lawyer's emails          | `anrak_composio` → `execute_tool` (GMAIL_LIST_EMAILS)  | `web_fetch` (no access)   |
+| Read calendar events          | `anrak_composio` → `execute_tool` (GOOGLECALENDAR\_\*) | `web_fetch` (no access)   |
+| Search Google Drive           | `anrak_composio` → `execute_tool` (GOOGLEDRIVE\_\*)    | `web_fetch` (no access)   |
 
 ### ALWAYS include results when logging actions
 
@@ -132,6 +142,19 @@ If you detect a pattern that needs monitoring, create a schedule using `anrak_ac
 - Remove schedules for resolved matters → `delete_schedule`
 
 **IMPORTANT:** Do NOT use the `cron` tool for schedules. Cron jobs are ephemeral and invisible to the lawyer. Only `anrak_actions` → `create_schedule` persists to the dashboard where the lawyer can see and manage them.
+
+### Use Connected Apps When Available
+
+On heartbeat, check `connectedToolkits` for the lawyer's connected apps. If available, use them proactively:
+
+- **Gmail connected**: When briefing, check for recent emails related to active cases. When the lawyer asks about communications, search their inbox.
+- **Google Calendar connected**: When checking deadlines, cross-reference with calendar events. When preparing a case briefing, include upcoming hearings from the calendar.
+- **Google Drive connected**: When researching a case, search Drive for related documents the lawyer may have outside the platform.
+- **Slack connected**: For urgent notifications, consider sending via Slack (if the lawyer prefers it over email).
+
+**Flow**: Call `anrak_composio` → `discover_tools` with the connected toolkit slugs first to see what's available, then use `execute_tool` to run specific tools.
+
+**NEVER** attempt to use Composio tools for toolkits that aren't in `connectedToolkits`. The gateway will reject the call.
 
 ## Indian Legal Context
 
