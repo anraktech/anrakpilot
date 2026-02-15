@@ -2,9 +2,8 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "nvidia/moonshotai/kimi-k2.5",
+        "primary": "openrouter/openrouter/auto",
         "fallbacks": [
-          "openrouter/openrouter/auto",
           "openrouter/moonshotai/kimi-k2-0905",
           "openrouter/anthropic/claude-sonnet-4-5",
           "openrouter/anthropic/claude-opus-4-6"
