@@ -237,6 +237,38 @@ export class AnrakLegalClient {
     return this.request("POST", "/api/bot/gateway/schedules", schedule);
   }
 
+  async listSchedules(enabledOnly?: boolean): Promise<
+    Array<{
+      id: string;
+      name: string;
+      scheduleType: string;
+      scheduleValue: string;
+      taskType: string;
+      enabled: boolean;
+      lastRunAt: string | null;
+      nextRunAt: string | null;
+      runCount: number;
+    }>
+  > {
+    const params = new URLSearchParams();
+    if (enabledOnly !== undefined) params.set("enabled", String(enabledOnly));
+    const qs = params.toString();
+    const res = await this.request<{
+      schedules: Array<{
+        id: string;
+        name: string;
+        scheduleType: string;
+        scheduleValue: string;
+        taskType: string;
+        enabled: boolean;
+        lastRunAt: string | null;
+        nextRunAt: string | null;
+        runCount: number;
+      }>;
+    }>("GET", `/api/bot/gateway/schedules${qs ? `?${qs}` : ""}`);
+    return res.schedules;
+  }
+
   async updateSchedule(scheduleId: string, updates: Record<string, unknown>): Promise<void> {
     await this.request("PUT", `/api/bot/gateway/schedules/${scheduleId}`, updates);
   }

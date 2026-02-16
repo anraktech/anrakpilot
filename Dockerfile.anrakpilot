@@ -73,6 +73,12 @@ RUN corepack enable \
 # Copy build output
 COPY --from=builder /app/dist ./dist
 
+# Plugin-sdk shim: the full src/plugin-sdk/index.ts imports stripped channel
+# providers (Discord, LINE, etc.) so tsdown can't build dist/plugin-sdk/index.js.
+# Place a minimal JS shim at the exact path resolvePluginSdkAlias() checks in prod.
+COPY docker/plugin-sdk-shim.js ./dist/plugin-sdk/index.js
+COPY docker/plugin-sdk-shim.ts ./src/plugin-sdk/index.ts
+
 # Copy extensions (plugin manifests + source required at runtime)
 COPY extensions ./extensions
 

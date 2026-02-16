@@ -19,6 +19,7 @@ const ACTIONS = [
   "heartbeat",
   "create_task",
   "create_schedule",
+  "list_schedules",
   "update_schedule",
   "delete_schedule",
   "notify_lawyer",
@@ -33,6 +34,7 @@ const AnrakActionsSchema = Type.Object({
       "Action: log_action (audit log), request_approval (human-in-the-loop), " +
       "check_approval (poll status), report_tokens (usage tracking), heartbeat (health check), " +
       "create_task (queue a task for yourself), create_schedule (create recurring schedule), " +
+      "list_schedules (view all current schedules), " +
       "update_schedule (modify schedule), delete_schedule (remove schedule), " +
       "notify_lawyer (send proactive email notification)",
   }),
@@ -110,7 +112,13 @@ const AnrakActionsSchema = Type.Object({
     Type.Record(Type.String(), Type.Unknown(), { description: "Task configuration" }),
   ),
 
-  // update/delete schedule fields
+  // list/update/delete schedule fields
+  enabled: Type.Optional(
+    Type.Boolean({
+      description:
+        "Filter by enabled status for list_schedules, or set enabled for update_schedule",
+    }),
+  ),
   schedule_id: Type.Optional(Type.String({ description: "Schedule ID for update/delete" })),
 
   // create_task fields
@@ -270,6 +278,12 @@ export function createAnrakActionsTool(): AnyAgentTool | null {
             ...(taskConfig ? { taskConfig } : {}),
           });
           return jsonResult({ ok: true, scheduleId: result.id });
+        }
+
+        case "list_schedules": {
+          const enabledOnly = params.enabled as boolean | undefined;
+          const schedules = await client.listSchedules(enabledOnly);
+          return jsonResult({ schedules, count: schedules.length });
         }
 
         case "update_schedule": {

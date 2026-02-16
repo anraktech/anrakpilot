@@ -10,61 +10,52 @@ Use the `anrak_actions` tool with action `heartbeat` to verify connectivity to t
 
 Use the `anrak_cases` tool with action `list_cases` to fetch the lawyer's current cases. Remember how many active cases there are.
 
-## Step 3: Set Up Daily Cron Jobs
+## Step 3: Set Up Persistent Schedules
 
-Use the `cron` tool to create these scheduled jobs. Before adding, use `cron` with action `list` to check if they already exist (avoid duplicates on restart).
+**IMPORTANT:** Do NOT use the `cron` tool. Cron jobs are ephemeral and lost on restart. Use `anrak_actions` → `list_schedules` first to check what already exists, then `create_schedule` to add any missing ones.
 
-### Job 1: Deadline Monitor (6:00 AM IST daily)
-
-```
-name: "anrakpilot:deadline-monitor"
-schedule: { kind: "cron", expr: "30 0 * * *", tz: "Asia/Kolkata" }
-sessionTarget: "isolated"
-payload: {
-  kind: "agentTurn",
-  message: "Run the deadline-monitor skill. Use anrak_cases to scan ALL active cases for upcoming deadlines. Check nextHearing dates and checklist item due dates. Classify urgency (>7 days = normal, 3-7 = warning, 1-3 = urgent, <1 = critical, past = overdue). Save the full deadline report as a case document using save_document. If ANY deadline is within 3 days or overdue, use anrak_actions notify_lawyer with urgency 'urgent' to email the lawyer immediately. If deadlines found need follow-up research or drafting, use create_task to queue those. Log results via anrak_actions with action_type 'schedule' and risk_level 'low'.",
-  timeoutSeconds: 120
-}
-```
-
-### Job 2: Daily Case Briefing (7:00 AM IST daily)
+Check existing schedules first:
 
 ```
-name: "anrakpilot:case-briefing"
-schedule: { kind: "cron", expr: "30 1 * * *", tz: "Asia/Kolkata" }
-sessionTarget: "isolated"
-payload: {
-  kind: "agentTurn",
-  message: "Run the case-briefing skill. Use anrak_cases to generate a concise daily briefing covering: today's priorities (hearings, deadlines), this week's calendar, case status summary, recent bot activity, and items needing lawyer attention. Keep it under 500 words. Save the briefing as a document in each relevant case using save_document. Then use anrak_actions notify_lawyer to email the full briefing to the lawyer with urgency 'normal'. If you spot anything requiring action, use create_task to queue follow-up work. Log via anrak_actions with action_type 'notify' and risk_level 'low'.",
-  timeoutSeconds: 120
-}
+anrak_actions → list_schedules
 ```
 
-### Job 3: Cause List Check (7:30 AM IST weekdays)
+If the following schedules don't already exist, create them:
+
+### Schedule 1: Deadline Monitor (6:00 AM IST daily)
 
 ```
-name: "anrakpilot:cause-list-check"
-schedule: { kind: "cron", expr: "0 2 * * 1-5", tz: "Asia/Kolkata" }
-sessionTarget: "isolated"
-payload: {
-  kind: "agentTurn",
-  message: "Run the web-research skill focused on cause lists. Use anrak_cases to get active cases, then use the browser tool to check relevant court cause lists on ecourts.gov.in for today's listings. Look for the lawyer's case numbers. If any case is listed today, immediately use anrak_actions notify_lawyer with urgency 'urgent' to alert the lawyer. Save findings as a case document using save_document. Log findings via anrak_actions with action_type 'research' and risk_level 'medium'.",
-  timeoutSeconds: 180
-}
+anrak_actions → create_schedule
+  name: "Deadline Monitor"
+  schedule_type: "daily"
+  schedule_value: "06:00"
+  task_type: "deadline_check"
+  description: "Scan all active cases for upcoming deadlines. Check nextHearing dates and checklist due dates. Notify lawyer of urgent deadlines."
 ```
 
-### Job 4: Heartbeat (every 30 minutes)
+### Schedule 2: Daily Case Briefing (7:00 AM IST daily)
 
 ```
-name: "anrakpilot:heartbeat"
-schedule: { kind: "every", everyMs: 1800000 }
-sessionTarget: "isolated"
-payload: {
-  kind: "agentTurn",
-  message: "Send a heartbeat to the AnrakLegal control plane using anrak_actions with action 'heartbeat'. If there are pending approvals, note them in your response.",
-  timeoutSeconds: 30
-}
+anrak_actions → create_schedule
+  name: "Daily Case Briefing"
+  schedule_type: "daily"
+  schedule_value: "07:00"
+  task_type: "briefing"
+  description: "Generate concise daily briefing: today's priorities, this week's calendar, case status summary, items needing attention."
 ```
+
+### Schedule 3: Cause List Check (7:30 AM IST weekdays)
+
+```
+anrak_actions → create_schedule
+  name: "Cause List Check"
+  schedule_type: "weekday"
+  schedule_value: "07:30"
+  task_type: "cause_list"
+  description: "Check court cause lists for today's listings matching active cases. Alert lawyer urgently if any case is listed."
+```
+
+Note: Heartbeat is handled automatically by the runtime — do not create a schedule for it.
 
 ## Step 4: Log Boot Completion
 
@@ -73,9 +64,7 @@ Use the `anrak_actions` tool to log the boot:
 - action: `log_action`
 - action_type: `"schedule"`
 - risk_level: `"low"`
-- description: `"AnrakPilot boot complete. [N] active cases found. 4 cron jobs configured."`
-- tools_used: `["boot", "cron", "anrak_cases", "anrak_actions"]`
+- description: `"AnrakPilot boot complete. [N] active cases found. Schedules verified."`
+- tools_used: `["anrak_cases", "anrak_actions"]`
 - status: `"completed"`
-- result: A brief summary of the cases found and cron jobs set up
-
-After logging, your boot is complete. The cron jobs will handle autonomous operation from here.
+- result: A brief summary of the cases found and schedules configured
