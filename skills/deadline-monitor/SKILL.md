@@ -104,4 +104,4 @@ Task type: deadline_check
 - For court hearings, note the court's schedule if available
 - Flag any case that hasn't had activity in 30+ days
 - If a deadline has passed without the checklist item being marked complete, flag as overdue
-- Use KIMI K2 for all deadline monitoring (no Claude needed)
+- Use the default model for all deadline monitoring

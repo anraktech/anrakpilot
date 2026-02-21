@@ -134,5 +134,5 @@ await client.logAction({
 - Don't repeat information already visible in the dashboard
 - If no significant updates, keep the briefing very short
 - Use plain language, not legal jargon, for the briefing format
-- Use KIMI K2 for briefing generation (no Claude needed)
+- Use the default model for briefing generation
 - If this is the first briefing (no prior activity), focus on case overview and upcoming deadlines

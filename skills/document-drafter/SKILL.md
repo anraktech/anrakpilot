@@ -1,6 +1,6 @@
 ---
 name: document-drafter
-description: Draft legal documents (applications, petitions, notices, affidavits). HIGH RISK - always requires lawyer approval before finalization. Uses Claude for drafting.
+description: Draft legal documents (applications, petitions, notices, affidavits). HIGH RISK - always requires lawyer approval before finalization. Uses advanced model for drafting.
 metadata: { "openclaw": { "emoji": "📝", "always": true } }
 ---
 
@@ -14,10 +14,10 @@ Draft legal documents for the lawyer's cases. All drafts require explicit lawyer
 
 ## Model Selection
 
-**Always use Claude (Sonnet or Opus) for document drafting.** KIMI K2 is not suitable for generating legal documents that may be filed in court. Switch model before drafting:
+**Always use the advanced model for document drafting.** The default model is not suitable for generating legal documents that may be filed in court. Switch to the best available model before drafting:
 
-- Standard documents (notices, applications): Claude Sonnet 4.5
-- Complex documents (petitions, appeals, detailed affidavits): Claude Opus 4.6
+- Standard documents (notices, applications): Use the standard paid model
+- Complex documents (petitions, appeals, detailed affidavits): Use the most capable available model
 
 ## Workflow
 
@@ -83,7 +83,7 @@ await client.logAction({
   riskLevel: "high",
   description: "Drafted [document type] for [case title] - pending lawyer approval",
   toolsUsed: ["document-drafter"],
-  modelUsed: "anthropic/claude-sonnet-4-5", // Always Claude
+  modelUsed: currentModel, // Use the best available model
   inputTokens,
   outputTokens,
   costUsd,

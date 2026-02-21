@@ -92,4 +92,4 @@ await client.logAction({
 - Note missing information that should typically be present
 - For multilingual documents (Hindi/English), process both languages
 - Respect document confidentiality - never include full text in logs, only summaries
-- Use KIMI K2 for standard analysis; escalate to Claude for complex contracts or judgments
+- Use the default model for standard analysis; use the advanced model for complex contracts or judgments

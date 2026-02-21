@@ -91,8 +91,8 @@ COPY config ./config
 # Copy workspace templates (required by OpenClaw agent bootstrap)
 COPY docs ./docs
 
-# Copy workspace files (agent identity + boot sequence)
-COPY SOUL.md BOOT.md ./
+# Copy workspace files (agent identity, boot sequence, skills reference)
+COPY SOUL.md BOOT.md SKILLS.md ./
 
 # Install config to OpenClaw's expected location
 # OPENCLAW_CONFIG_PATH env var points to our config

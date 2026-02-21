@@ -96,4 +96,4 @@ await client.logAction({
 - For statutory research, cite the exact section and amendment year
 - Do not fabricate citations - only report cases actually found in the database
 - If no relevant precedent is found, report that clearly
-- Use KIMI K2 for research; escalate to Claude only for complex analysis
+- Use the default model for research; use the advanced model for complex analysis

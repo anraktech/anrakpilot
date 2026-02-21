@@ -117,5 +117,5 @@ Recommended daily cron jobs:
 - Cache results to avoid redundant page loads
 - If a site is down or blocked, log the failure and move on
 - Extract text content only - do not download large files without logging
-- Use KIMI K2 for web research tasks
+- Use the default model for web research tasks
 - Maximum 20 pages per research session to control costs

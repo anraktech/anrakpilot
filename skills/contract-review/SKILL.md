@@ -1,6 +1,6 @@
 ---
 name: contract-review
-description: Review contracts against playbooks - flag risky clauses, missing provisions, and suggest improvements. Medium risk, requires review. Uses Claude for analysis.
+description: Review contracts against playbooks - flag risky clauses, missing provisions, and suggest improvements. Medium risk, requires review. Uses advanced model for analysis.
 metadata: { "openclaw": { "emoji": "📑", "always": true } }
 ---
 
@@ -14,9 +14,9 @@ Analysis output requires lawyer review before any action. Log every action via `
 
 ## Model Selection
 
-**Use Claude (Sonnet 4.5) for contract review.** Legal analysis requires high accuracy.
+**Use the advanced model for contract review.** Legal analysis requires high accuracy.
 
-For complex multi-party agreements or high-value contracts, escalate to Claude Opus 4.6.
+For complex multi-party agreements or high-value contracts, use the most capable available model.
 
 ## Playbooks
 

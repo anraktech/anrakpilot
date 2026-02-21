@@ -103,4 +103,4 @@ await client.logAction({
 - Respect case type - don't suggest criminal procedure items for civil cases
 - Consider the court and jurisdiction when suggesting procedural steps
 - Never remove or un-check an item the lawyer has marked as complete
-- Use KIMI K2 for standard reviews; no Claude escalation needed
+- Use the default model for standard reviews
